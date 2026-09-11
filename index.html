@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>NEWCASTLE INTERNATIONAL SCHOOL - Smart Attendance Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #0a2540;
+      --primary-accent: #2563eb;
+      --secondary: #f43f5e;
+      --accent: #f59e0b;
+      --success: #10b981;
+      --success-light: #ecfdf5;
+      --danger: #ef4444;
+      --danger-light: #fef2f2;
+      --wa-color: #22c55e;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --radius: 16px;
+      --shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.05), 0 8px 10px -6px rgba(15, 23, 42, 0.02);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+    body { background: var(--bg); color: var(--text-main); padding: 12px; padding-bottom: 90px; }
+    .container { max-width: 1150px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+
+    .app-card { background: var(--card-bg); border-radius: var(--radius); padding: 18px; border: 1px solid var(--border); box-shadow: var(--shadow); }
+
+    .header-bar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+    .brand-wrap { display: flex; align-items: center; gap: 14px; }
+    .school-logo { width: 62px; height: 62px; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.05)); }
+    .brand-titles h1 { font-size: 18px; font-weight: 800; color: var(--primary); letter-spacing: 0.3px; text-transform: uppercase; }
+    .brand-titles p { font-size: 12px; font-weight: 700; color: #9333ea; font-style: italic; }
+    .brand-titles span { font-size: 11px; color: var(--text-muted); display: block; margin-top: 2px; }
+
+    .btn { cursor: pointer; border: none; border-radius: 10px; padding: 8px 14px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s ease; }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary { background: var(--primary-accent); color: #fff; }
+    .btn-success { background: var(--success); color: #fff; }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-ghost { background: #f1f5f9; color: var(--text-main); }
+    .btn-ghost.active { background: var(--primary); color: #fff; }
+
+    .live-dashboard { display: grid; grid-template-columns: 1.4fr repeat(3, 1fr); gap: 10px; margin-top: 12px; }
+    .live-clock-card { background: linear-gradient(135deg, #0a2540, #1e3a8a); color: #fff; border-radius: 12px; padding: 12px 16px; display: flex; flex-direction: column; justify-content: center; }
+    .live-clock-card .date { font-size: 12px; font-weight: 500; opacity: 0.85; }
+    .live-clock-card .time { font-size: 20px; font-weight: 800; font-family: monospace; color: #38bdf8; margin-top: 2px; }
+
+    .stat-card { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 10px; text-align: center; display: flex; flex-direction: column; justify-content: center; position: relative; }
+    .stat-card .title { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .stat-card .value { font-size: 24px; font-weight: 800; margin-top: 2px; }
+    .stat-card .sub-stat { font-size: 11px; font-weight: 600; color: #64748b; margin-top: 3px; background: #f1f5f9; padding: 2px 6px; border-radius: 6px; }
+
+    .tabs-wrap { display: flex; gap: 8px; border-bottom: 2px solid var(--border); margin-top: 12px; overflow-x: auto; }
+    .tab-item { background: none; border: none; padding: 10px 16px; font-size: 14px; font-weight: 700; color: var(--text-muted); border-bottom: 3px solid transparent; border-radius: 0; cursor: pointer; white-space: nowrap; }
+    .tab-item.active { color: var(--primary-accent); border-bottom-color: var(--primary-accent); }
+
+    .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin: 10px 0; }
+    input, select { padding: 10px 14px; border: 1px solid var(--border); border-radius: 10px; font-size: 13px; outline: none; background: #fff; width: 100%; font-weight: 500; }
+    input:focus, select:focus { border-color: var(--primary-accent); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+
+    .student-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; margin-top: 14px; }
+    .student-card { background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 10px; transition: 0.2s ease; border-left: 5px solid var(--success); }
+    .student-card.is-absent { border-left-color: var(--danger); background: #fffafa; }
+
+    .st-top { display: flex; justify-content: space-between; align-items: center; }
+    .st-top .name { font-size: 15px; font-weight: 700; color: var(--text-main); }
+    .st-top .roll-tag { font-size: 11px; font-weight: 800; background: #f1f5f9; padding: 3px 8px; border-radius: 20px; color: var(--primary); }
+    .st-sub { font-size: 12px; color: var(--text-muted); display: flex; justify-content: space-between; }
+
+    .toggle-container { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px; }
+    .btn-toggle { padding: 10px; border-radius: 10px; border: 1px solid var(--border); font-size: 13px; font-weight: 700; cursor: pointer; background: #f8fafc; color: var(--text-muted); transition: 0.15s; }
+    .btn-toggle.p-active { background: var(--success); color: #fff; border-color: var(--success); }
+    .btn-toggle.a-active { background: var(--danger); color: #fff; border-color: var(--danger); }
+
+    .st-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 8px; border-top: 1px dashed var(--border); }
+    .btn-wa-link { background: var(--wa-color); color: #fff; text-decoration: none; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; box-shadow: 0 2px 6px rgba(34,197,94,0.3); }
+
+    .mobile-dock { position: fixed; bottom: 0; left: 0; width: 100%; background: #ffffff; border-top: 1px solid var(--border); padding: 10px 16px; display: flex; gap: 10px; z-index: 100; box-shadow: 0 -4px 15px rgba(0,0,0,0.06); }
+    .mobile-dock button { flex: 1; padding: 12px; font-size: 14px; border-radius: 10px; }
+
+    @media (min-width: 768px) {
+      body { padding: 20px; padding-bottom: 20px; }
+      .brand-titles h1 { font-size: 22px; }
+      .mobile-dock { display: none; }
+      .desktop-btn-sync { display: flex !important; }
+    }
+    @media (max-width: 767px) {
+      .live-dashboard { grid-template-columns: 1fr 1fr; }
+      .live-clock-card { grid-column: span 2; }
+      .desktop-btn-sync { display: none !important; }
+    }
+
+    .modal-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.6); backdrop-filter: blur(3px); display: none; align-items: center; justify-content: center; z-index: 999; padding: 15px; }
+    .modal-box { background: #fff; border-radius: 18px; padding: 22px; width: 100%; max-width: 480px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); max-height: 90vh; overflow-y: auto; }
+
+    .absent-item-row { display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #f8fafc; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 8px; }
+    .absent-item-info { font-size: 13px; }
+    .absent-item-info strong { display: block; color: var(--primary); }
+    .absent-item-info span { font-size: 11px; color: var(--text-muted); }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  
+  <div class="app-card">
+    <div class="header-bar">
+      <div class="brand-wrap">
+        <img src="logo.png" onerror="this.onerror=null; this.src='6.jpg';" class="school-logo" alt="School Logo">
+        <div class="brand-titles">
+          <h1>NEWCASTLE INTL SCHOOL</h1>
+          <p>"A House of Creative Education"</p>
+          <span>📍 Japani bazar, Zia soroni, Soniakra, Dhaka-1236</span>
+        </div>
+      </div>
+      <div style="font-size: 13px; font-weight: 700; color: var(--primary-accent); background: #e0e7ff; padding: 6px 14px; border-radius: 20px;">
+        Central Attendance Portal
+      </div>
+    </div>
+
+    <!-- সর্বমোট এবং নির্বাচিত ক্লাসের লাইভ কাউন্টার -->
+    <div class="live-dashboard">
+      <div class="live-clock-card">
+        <div class="date" id="liveDateText">--</div>
+        <div class="time" id="liveTimeText">00:00:00 AM</div>
+      </div>
+      <div class="stat-card">
+        <span class="title">All School Students</span>
+        <span class="value" id="valLiveTotal" style="color: var(--primary);">0</span>
+        <span class="sub-stat" id="subTotalClass">Selected: 0</span>
+      </div>
+      <div class="stat-card">
+        <span class="title" style="color: var(--success);">All Present</span>
+        <span class="value" id="valLivePresent" style="color: var(--success);">0</span>
+        <span class="sub-stat" id="subPresentClass">Selected: 0</span>
+      </div>
+      <div class="stat-card">
+        <span class="title" style="color: var(--danger);">All Absent</span>
+        <span class="value" id="valLiveAbsent" style="color: var(--danger);">0</span>
+        <span class="sub-stat" id="subAbsentClass">Selected: 0</span>
+      </div>
+    </div>
+
+    <div class="tabs-wrap">
+      <button class="tab-item active" id="tabBtnAttendance" onclick="switchTab('attendance')">📋 Daily Attendance</button>
+      <button class="tab-item" id="tabBtnReports" onclick="switchTab('reports')">📊 Working Days & Reports</button>
+    </div>
+  </div>
+
+  <!-- 1. Daily Attendance View -->
+  <div class="app-card" id="tabAttendanceView">
+    <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+      <div style="flex: 1; max-width: 320px;">
+        <select id="classFilter" onchange="renderAttendanceCards()"></select>
+      </div>
+      <div class="desktop-btn-sync" style="display: none; gap: 8px;">
+        <button class="btn btn-primary" onclick="loadStudentsFromCloud()">🔄 Refresh Data</button>
+        <button class="btn btn-success" onclick="saveTodayAttendanceAndNotify()">📊 Submit & Alert Absents</button>
+      </div>
+    </div>
+
+    <details style="margin-top: 12px; background: #f8fafc; border-radius: 12px; padding: 10px 14px; border: 1px solid var(--border);">
+      <summary style="font-weight: 700; font-size: 13px; cursor: pointer; color: var(--primary-accent);">➕ Add New Student (Class 1-10 or Std 1-10)</summary>
+      <div class="form-row" style="margin-top: 10px;">
+        <select id="inputClass"></select>
+        <input type="text" id="inputRoll" placeholder="Roll No">
+        <input type="text" id="inputName" placeholder="Student Name">
+        <input type="text" id="inputPhone" placeholder="Parent Phone (e.g. 8801...)">
+        <button class="btn btn-success" id="btnAddStudent" onclick="handleAddStudent()" style="grid-column: 1 / -1; padding: 11px;">Save Student to Database</button>
+      </div>
+    </details>
+
+    <div class="student-grid" id="studentCardsContainer"></div>
+  </div>
+
+  <!-- 2. Reports View -->
+  <div class="app-card" id="tabReportsView" style="display: none;">
+    <div class="form-row">
+      <select id="reportClassSelect"></select>
+      <select id="reportTimeFilter" onchange="toggleCustomDates()">
+        <option value="today">Today</option>
+        <option value="week">Past 7 Days (Weekly)</option>
+        <option value="month">Current Month (Monthly)</option>
+        <option value="custom">Custom Date Range</option>
+      </select>
+    </div>
+
+    <div id="customDateRangeWrap" style="display: none; gap: 8px; margin-bottom: 10px;">
+      <input type="date" id="reportStartDate">
+      <input type="date" id="reportEndDate">
+    </div>
+
+    <input type="text" id="reportSearchKeyword" placeholder="Filter by Roll or Name (Optional)" style="margin-bottom: 10px;">
+
+    <div style="display: flex; gap: 8px;">
+      <button class="btn btn-primary" onclick="computeReports()" style="flex: 1; padding: 12px;">🔍 Generate Report</button>
+      <button class="btn btn-success" onclick="window.print()" style="flex: 1; padding: 12px;">🖨️ Print / Save PDF</button>
+    </div>
+
+    <div style="overflow-x: auto; margin-top: 16px;">
+      <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+        <thead>
+          <tr style="background: #f8fafc; border-bottom: 2px solid var(--border); text-align: left;">
+            <th style="padding: 10px;">Roll</th>
+            <th style="padding: 10px;">Student Name</th>
+            <th style="padding: 10px; text-align: center;">Working Days</th>
+            <th style="padding: 10px; text-align: center; color: var(--success);">Present</th>
+            <th style="padding: 10px; text-align: center; color: var(--danger);">Absent</th>
+            <th style="padding: 10px; text-align: center;">Attendance Rate</th>
+          </tr>
+        </thead>
+        <tbody id="reportTableBody">
+          <tr><td colspan="6" style="text-align: center; padding: 20px; color: var(--text-muted);">Select class and range, then click 'Generate Report'.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- Mobile Bottom Dock -->
+<div class="mobile-dock">
+  <button class="btn btn-primary" onclick="loadStudentsFromCloud()">🔄 Refresh</button>
+  <button class="btn btn-success" onclick="saveTodayAttendanceAndNotify()">📊 Submit & Alert Absents</button>
+</div>
+
+<!-- Absent WhatsApp Batch Dispatcher Modal -->
+<div class="modal-backdrop" id="absentBatchModal">
+  <div class="modal-box">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+      <h3 style="font-size: 16px; font-weight: 800; color: var(--danger);">📲 Absent Students Notification</h3>
+      <button class="btn btn-ghost" onclick="closeAbsentModal()" style="padding: 4px 8px;">✕</button>
+    </div>
+    <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;">
+      Attendance has been saved to Google Sheets. Send WhatsApp alerts to the absent students below:
+    </p>
+
+    <div id="absentListContainer" style="max-height: 280px; overflow-y: auto; margin-bottom: 14px;"></div>
+
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <button class="btn btn-primary" onclick="copyAllAbsentSummary()">📋 Copy All Absents Message</button>
+      <button class="btn btn-ghost" onclick="closeAbsentModal()">Done / Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal-backdrop" id="editModalBackdrop">
+  <div class="modal-box">
+    <h3 style="font-size: 16px; font-weight: 800; color: var(--primary); margin-bottom: 14px;">✏️ Edit Student Information</h3>
+    <input type="hidden" id="editOldClassId">
+    <input type="hidden" id="editOldRoll">
+    
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+      <div>
+        <label style="font-size: 12px; font-weight: 600;">Class / Section:</label>
+        <select id="editClassSelect"></select>
+      </div>
+      <div>
+        <label style="font-size: 12px; font-weight: 600;">Roll No:</label>
+        <input type="text" id="editRollInput">
+      </div>
+      <div>
+        <label style="font-size: 12px; font-weight: 600;">Student Name:</label>
+        <input type="text" id="editNameInput">
+      </div>
+      <div>
+        <label style="font-size: 12px; font-weight: 600;">Parent Phone Number:</label>
+        <input type="text" id="editPhoneInput">
+      </div>
+    </div>
+
+    <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px;">
+      <button class="btn btn-danger" onclick="closeEditModal()">Cancel</button>
+      <button class="btn btn-success" onclick="handleSaveEdit()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Paste your Apps Script Web App Deployment URL below:
+  const GOOGLE_SHEET_WEB_APP_URL = "https://script.google.com/macros/s/AKfycby-4F0mZL9Tkw4lRzaWEDcl5M6K7P-F6HIwDfLrdIL5rb9W7MGcdn2XXGo2drXtbnoN/exec";
+
+  const SCHOOL_INFO = {
+    name: "NEWCASTLE INTERNATIONAL SCHOOL",
+    address: "Japani bazar, Zia soroni, Soniakra, Dhaka-1236"
+  };
+
+  const classList = [
+    // Standard Section
+    { id: "std_1", name: "Std-1", group: "Standard" },
+    { id: "std_2", name: "Std-2", group: "Standard" },
+    { id: "std_3", name: "Std-3", group: "Standard" },
+    { id: "std_4", name: "Std-4", group: "Standard" },
+    { id: "std_5", name: "Std-5", group: "Standard" },
+    { id: "std_6", name: "Std-6", group: "Standard" },
+    { id: "std_7", name: "Std-7", group: "Standard" },
+    { id: "std_8", name: "Std-8", group: "Standard" },
+    { id: "std_9", name: "Std-9", group: "Standard" },
+    { id: "std_10", name: "Std-10", group: "Standard" },
+
+    // Class Section
+    { id: "cls_1", name: "Class 1", group: "Class" },
+    { id: "cls_2", name: "Class 2", group: "Class" },
+    { id: "cls_3", name: "Class 3", group: "Class" },
+    { id: "cls_4", name: "Class 4", group: "Class" },
+    { id: "cls_5", name: "Class 5", group: "Class" },
+    { id: "cls_6", name: "Class 6", group: "Class" },
+    { id: "cls_7", name: "Class 7", group: "Class" },
+    { id: "cls_8", name: "Class 8", group: "Class" },
+    { id: "cls_9", name: "Class 9", group: "Class" },
+    { id: "cls_10", name: "Class 10", group: "Class" }
+  ];
+
+  // =========================================================================
+  // প্রতি ক্লাসে ৫ জন করে মোট ১০০ জন ডেমো শিক্ষার্থী
+  // =========================================================================
+  let students = [
+    // Std-1
+    { classId: "std_1", roll: "1", name: "Arian Ahmed", phone: "8801711000101", status: "Present" },
+    { classId: "std_1", roll: "2", name: "Zayan Kabir", phone: "8801711000102", status: "Present" },
+    { classId: "std_1", roll: "3", name: "Safa Islam", phone: "8801711000103", status: "Present" },
+    { classId: "std_1", roll: "4", name: "Rayyan Khan", phone: "8801711000104", status: "Present" },
+    { classId: "std_1", roll: "5", name: "Ayat Rahman", phone: "8801711000105", status: "Present" },
+
+    // Std-2
+    { classId: "std_2", roll: "1", name: "Tanvir Hasan", phone: "8801711000201", status: "Present" },
+    { classId: "std_2", roll: "2", name: "Muntaha Akter", phone: "8801711000202", status: "Present" },
+    { classId: "std_2", roll: "3", name: "Ahnaf Sadid", phone: "8801711000203", status: "Present" },
+    { classId: "std_2", roll: "4", name: "Nabila Tabassum", phone: "8801711000204", status: "Present" },
+    { classId: "std_2", roll: "5", name: "Samiul Islam", phone: "8801711000205", status: "Present" },
+
+    // Std-3
+    { classId: "std_3", roll: "1", name: "Farhan Labib", phone: "8801711000301", status: "Present" },
+    { classId: "std_3", roll: "2", name: "Anika Bushra", phone: "8801711000302", status: "Present" },
+    { classId: "std_3", roll: "3", name: "Maheem Chowdhury", phone: "8801711000303", status: "Present" },
+    { classId: "std_3", roll: "4", name: "Wafiq Alom", phone: "8801711000304", status: "Present" },
+    { classId: "std_3", roll: "5", name: "Ruhee Jannat", phone: "8801711000305", status: "Present" },
+
+    // Std-4
+    { classId: "std_4", roll: "1", name: "Nayeem Uddin", phone: "8801711000401", status: "Present" },
+    { classId: "std_4", roll: "2", name: "Tahmid Hossain", phone: "8801711000402", status: "Present" },
+    { classId: "std_4", roll: "3", name: "Sumaiya Binte", phone: "8801711000403", status: "Present" },
+    { classId: "std_4", roll: "4", name: "Tasnim Hasan", phone: "8801711000404", status: "Present" },
+    { classId: "std_4", roll: "5", name: "Fabiha Noor", phone: "8801711000405", status: "Present" },
+
+    // Std-5
+    { classId: "std_5", roll: "1", name: "Rifat Mahmud", phone: "8801711000501", status: "Present" },
+    { classId: "std_5", roll: "2", name: "Afia Humayra", phone: "8801711000502", status: "Present" },
+    { classId: "std_5", roll: "3", name: "Shahriar Shakil", phone: "8801711000503", status: "Present" },
+    { classId: "std_5", roll: "4", name: "Lamia Mehnaz", phone: "8801711000504", status: "Present" },
+    { classId: "std_5", roll: "5", name: "Adnan Sami", phone: "8801711000505", status: "Present" },
+
+    // Std-6
+    { classId: "std_6", roll: "1", name: "Zuhayr Haque", phone: "8801711000601", status: "Present" },
+    { classId: "std_6", roll: "2", name: "Marium Sultana", phone: "8801711000602", status: "Present" },
+    { classId: "std_6", roll: "3", name: "Mahir Faysal", phone: "8801711000603", status: "Present" },
+    { classId: "std_6", roll: "4", name: "Samia Tasneem", phone: "8801711000604", status: "Present" },
+    { classId: "std_6", roll: "5", name: "Tawsif Ur Rahman", phone: "8801711000605", status: "Present" },
+
+    // Std-7
+    { classId: "std_7", roll: "1", name: "Alve Hasan", phone: "8801711000701", status: "Present" },
+    { classId: "std_7", roll: "2", name: "Fariha Mehzabin", phone: "8801711000702", status: "Present" },
+    { classId: "std_7", roll: "3", name: "Mushfiqur Rahim", phone: "8801711000703", status: "Present" },
+    { classId: "std_7", roll: "4", name: "Israt Jahan", phone: "8801711000704", status: "Present" },
+    { classId: "std_7", roll: "5", name: "Shakib Al Hasan", phone: "8801711000705", status: "Present" },
+
+    // Std-8
+    { classId: "std_8", roll: "1", name: "Mehedi Hasan", phone: "8801711000801", status: "Present" },
+    { classId: "std_8", roll: "2", name: "Khadija Tul Kobra", phone: "8801711000802", status: "Present" },
+    { classId: "std_8", roll: "3", name: "Ashfaq Ahmed", phone: "8801711000803", status: "Present" },
+    { classId: "std_8", roll: "4", name: "Ayesha Siddiqua", phone: "8801711000804", status: "Present" },
+    { classId: "std_8", roll: "5", name: "Junaid Jamshed", phone: "8801711000805", status: "Present" },
+
+    // Std-9
+    { classId: "std_9", roll: "1", name: "Saadman Sakib", phone: "8801711000901", status: "Present" },
+    { classId: "std_9", roll: "2", name: "Tasnia Farin", phone: "8801711000902", status: "Present" },
+    { classId: "std_9", roll: "3", name: "Hasibul Hossain", phone: "8801711000903", status: "Present" },
+    { classId: "std_9", roll: "4", name: "Nusrat Imrose", phone: "8801711000904", status: "Present" },
+    { classId: "std_9", roll: "5", name: "Nazmul Huda", phone: "8801711000905", status: "Present" },
+
+    // Std-10
+    { classId: "std_10", roll: "1", name: "Tamim Iqbal", phone: "8801711001001", status: "Present" },
+    { classId: "std_10", roll: "2", name: "Sabrina Prome", phone: "8801711001002", status: "Present" },
+    { classId: "std_10", roll: "3", name: "Mahmudullah Riyad", phone: "8801711001003", status: "Present" },
+    { classId: "std_10", roll: "4", name: "Sadia Islam", phone: "8801711001004", status: "Present" },
+    { classId: "std_10", roll: "5", name: "Mustafizur Rahman", phone: "8801711001005", status: "Present" },
+
+    // Class 1
+    { classId: "cls_1", roll: "1", name: "Kazi Abrar", phone: "8801722000101", status: "Present" },
+    { classId: "cls_1", roll: "2", name: "Nusrat Jahan", phone: "8801722000102", status: "Present" },
+    { classId: "cls_1", roll: "3", name: "Sayeed Anowar", phone: "8801722000103", status: "Present" },
+    { classId: "cls_1", roll: "4", name: "Tahia Tasnim", phone: "8801722000104", status: "Present" },
+    { classId: "cls_1", roll: "5", name: "Zubair Masud", phone: "8801722000105", status: "Present" },
+
+    // Class 2
+    { classId: "cls_2", roll: "1", name: "Mirza Galib", phone: "8801722000201", status: "Present" },
+    { classId: "cls_2", roll: "2", name: "Humayra Kabir", phone: "8801722000202", status: "Present" },
+    { classId: "cls_2", roll: "3", name: "Siam Ahmed", phone: "8801722000203", status: "Present" },
+    { classId: "cls_2", roll: "4", name: "Samira Khanom", phone: "8801722000204", status: "Present" },
+    { classId: "cls_2", roll: "5", name: "Ehsanul Haque", phone: "8801722000205", status: "Present" },
+
+    // Class 3
+    { classId: "cls_3", roll: "1", name: "Wasim Akram", phone: "8801722000301", status: "Present" },
+    { classId: "cls_3", roll: "2", name: "Rumaiza Binte", phone: "8801722000302", status: "Present" },
+    { classId: "cls_3", roll: "3", name: "Jawad Rahim", phone: "8801722000303", status: "Present" },
+    { classId: "cls_3", roll: "4", name: "Anisa Tahsin", phone: "8801722000304", status: "Present" },
+    { classId: "cls_3", roll: "5", name: "Shariq Hasan", phone: "8801722000305", status: "Present" },
+
+    // Class 4
+    { classId: "cls_4", roll: "1", name: "Touhid Hridoy", phone: "8801722000401", status: "Present" },
+    { classId: "cls_4", roll: "2", name: "Mahfuza Khatun", phone: "8801722000402", status: "Present" },
+    { classId: "cls_4", roll: "3", name: "Shariful Islam", phone: "8801722000403", status: "Present" },
+    { classId: "cls_4", roll: "4", name: "Raihana Akter", phone: "8801722000404", status: "Present" },
+    { classId: "cls_4", roll: "5", name: "Tanzim Hasan", phone: "8801722000405", status: "Present" },
+
+    // Class 5
+    { classId: "cls_5", roll: "1", name: "Liton Kumar", phone: "8801722000501", status: "Present" },
+    { classId: "cls_5", roll: "2", name: "Jannatul Ferdous", phone: "8801722000502", status: "Present" },
+    { classId: "cls_5", roll: "3", name: "Soumya Sarkar", phone: "8801722000503", status: "Present" },
+    { classId: "cls_5", roll: "4", name: "Farzana Haque", phone: "8801722000504", status: "Present" },
+    { classId: "cls_5", roll: "5", name: "Afif Hossain", phone: "8801722000505", status: "Present" },
+
+    // Class 6
+    { classId: "cls_6", roll: "1", name: "Sheikh Rasel", phone: "8801722000601", status: "Present" },
+    { classId: "cls_6", roll: "2", name: "Nabila Zannat", phone: "8801722000602", status: "Present" },
+    { classId: "cls_6", roll: "3", name: "Zunaid Ahmed", phone: "8801722000603", status: "Present" },
+    { classId: "cls_6", roll: "4", name: "Suraiya Parvin", phone: "8801722000604", status: "Present" },
+    { classId: "cls_6", roll: "5", name: "Kamrul Islam", phone: "8801722000605", status: "Present" },
+
+    // Class 7
+    { classId: "cls_7", roll: "1", name: "Rishad Hossain", phone: "8801722000701", status: "Present" },
+    { classId: "cls_7", roll: "2", name: "Marufa Akter", phone: "8801722000702", status: "Present" },
+    { classId: "cls_7", roll: "3", name: "Tanzid Hasan", phone: "8801722000703", status: "Present" },
+    { classId: "cls_7", roll: "4", name: "Salma Khatun", phone: "8801722000704", status: "Present" },
+    { classId: "cls_7", roll: "5", name: "Nasum Ahmed", phone: "8801722000705", status: "Present" },
+
+    // Class 8
+    { classId: "cls_8", roll: "1", name: "Taijul Islam", phone: "8801722000801", status: "Present" },
+    { classId: "cls_8", roll: "2", name: "Rumana Ahmed", phone: "8801722000802", status: "Present" },
+    { classId: "cls_8", roll: "3", name: "Ebadot Hossain", phone: "8801722000803", status: "Present" },
+    { classId: "cls_8", roll: "4", name: "Sharmin Sultana", phone: "8801722000804", status: "Present" },
+    { classId: "cls_8", roll: "5", name: "Khaled Ahmed", phone: "8801722000805", status: "Present" },
+
+    // Class 9
+    { classId: "cls_9", roll: "1", name: "Hasan Mahmud", phone: "8801722000901", status: "Present" },
+    { classId: "cls_9", roll: "2", name: "Nahida Akter", phone: "8801722000902", status: "Present" },
+    { classId: "cls_9", roll: "3", name: "Zakir Hasan", phone: "8801722000903", status: "Present" },
+    { classId: "cls_9", roll: "4", name: "Sanjida Islam", phone: "8801722000904", status: "Present" },
+    { classId: "cls_9", roll: "5", name: "Mosaddek Hossain", phone: "8801722000905", status: "Present" },
+
+    // Class 10
+    { classId: "cls_10", roll: "1", name: "Taskin Ahmed", phone: "8801722001001", status: "Present" },
+    { classId: "cls_10", roll: "2", name: "Jahanara Alam", phone: "8801722001002", status: "Present" },
+    { classId: "cls_10", roll: "3", name: "Shoriful Islam", phone: "8801722001003", status: "Present" },
+    { classId: "cls_10", roll: "4", name: "Shamima Sultana", phone: "8801722001004", status: "Present" },
+    { classId: "cls_10", roll: "5", name: "Rubel Hossain", phone: "8801722001005", status: "Present" }
+  ];
+
+  function init() {
+    const today = new Date();
+    document.getElementById('reportStartDate').value = today.toISOString().split('T')[0];
+    document.getElementById('reportEndDate').value = today.toISOString().split('T')[0];
+
+    startClock();
+    populateDropdowns();
+
+    // ক্লাউড কানেক্ট থাকলে শিট থেকে ফেচ হবে, অন্যথায় ১০০ জন ডেমো স্টুডেন্ট স্বয়ংক্রিয়ভাবে লোড হবে
+    if (isCloudConfigured()) {
+      loadStudentsFromCloud();
+    } else {
+      renderAttendanceCards();
+    }
+  }
+
+  function isCloudConfigured() {
+    return GOOGLE_SHEET_WEB_APP_URL && !GOOGLE_SHEET_WEB_APP_URL.includes("YOUR_GOOGLE");
+  }
+
+  function startClock() {
+    function update() {
+      const now = new Date();
+      document.getElementById('liveDateText').innerText = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', weekday: 'short', year: 'numeric' });
+      document.getElementById('liveTimeText').innerText = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    }
+    update();
+    setInterval(update, 1000);
+  }
+
+  function populateDropdowns() {
+    const filterSelect = document.getElementById('classFilter');
+    const inputSelect = document.getElementById('inputClass');
+    const reportSelect = document.getElementById('reportClassSelect');
+    const editSelect = document.getElementById('editClassSelect');
+
+    const generateOptions = (includeAll) => {
+      let html = includeAll ? `<option value="all">All Classes & Standards (100 Students)</option>` : '';
+      html += `<optgroup label="Standard (Std-1 to Std-10)">`;
+      classList.filter(c => c.group === 'Standard').forEach(c => {
+        html += `<option value="${c.id}">${c.name}</option>`;
+      });
+      html += `</optgroup>`;
+
+      html += `<optgroup label="Class (Class 1 to Class 10)">`;
+      classList.filter(c => c.group === 'Class').forEach(c => {
+        html += `<option value="${c.id}">${c.name}</option>`;
+      });
+      html += `</optgroup>`;
+      return html;
+    };
+
+    filterSelect.innerHTML = generateOptions(true);
+    inputSelect.innerHTML = generateOptions(false);
+    reportSelect.innerHTML = generateOptions(false);
+    editSelect.innerHTML = generateOptions(false);
+  }
+
+  function getClassName(id) {
+    const found = classList.find(c => c.id === id);
+    return found ? found.name : id;
+  }
+
+  function switchTab(tab) {
+    document.getElementById('tabAttendanceView').style.display = tab === 'attendance' ? 'block' : 'none';
+    document.getElementById('tabReportsView').style.display = tab === 'reports' ? 'block' : 'none';
+    document.getElementById('tabBtnAttendance').classList.toggle('active', tab === 'attendance');
+    document.getElementById('tabBtnReports').classList.toggle('active', tab === 'reports');
+  }
+
+  function toggleCustomDates() {
+    const isCustom = document.getElementById('reportTimeFilter').value === 'custom';
+    document.getElementById('customDateRangeWrap').style.display = isCustom ? 'flex' : 'none';
+  }
+
+  async function loadStudentsFromCloud() {
+    if (!isCloudConfigured()) return;
+    try {
+      const res = await fetch(GOOGLE_SHEET_WEB_APP_URL + "?type=students");
+      const cloudData = await res.json();
+      if (Array.isArray(cloudData) && cloudData.length > 0) {
+        students = cloudData;
+      }
+      renderAttendanceCards();
+    } catch (e) {
+      console.warn("Using offline demo dataset:", e);
+      renderAttendanceCards();
+    }
+  }
+
+  function updateCounters(visibleList) {
+    const schoolTotal = students.length;
+    let schoolPresent = 0;
+    let schoolAbsent = 0;
+
+    students.forEach(s => {
+      if (s.status === 'Absent') schoolAbsent++;
+      else schoolPresent++;
+    });
+
+    document.getElementById('valLiveTotal').innerText = schoolTotal;
+    document.getElementById('valLivePresent').innerText = schoolPresent;
+    document.getElementById('valLiveAbsent').innerText = schoolAbsent;
+
+    const filterTotal = visibleList.length;
+    let filterPresent = 0;
+    let filterAbsent = 0;
+
+    visibleList.forEach(s => {
+      if (s.status === 'Absent') filterAbsent++;
+      else filterPresent++;
+    });
+
+    document.getElementById('subTotalClass').innerText = `Selected: ${filterTotal}`;
+    document.getElementById('subPresentClass').innerText = `Selected: ${filterPresent}`;
+    document.getElementById('subAbsentClass').innerText = `Selected: ${filterAbsent}`;
+  }
+
+  function renderAttendanceCards() {
+    const container = document.getElementById('studentCardsContainer');
+    container.innerHTML = '';
+    const filter = document.getElementById('classFilter').value;
+    const todayStr = new Date().toLocaleDateString('en-CA');
+
+    const visibleList = students.filter(s => filter === 'all' || s.classId === filter);
+    updateCounters(visibleList);
+
+    if (visibleList.length === 0) {
+      container.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; padding: 30px; color: var(--text-muted); background: #f8fafc; border-radius: 12px;">No students found in this section. Add students using the form above.</div>`;
+      return;
+    }
+
+    visibleList.forEach((s) => {
+      const globalIdx = students.indexOf(s);
+      const isAbsent = s.status === 'Absent';
+      const cName = getClassName(s.classId);
+      
+      const msg = `Dear Parent,\nStudent ${s.name} (${cName}, Roll: ${s.roll}) of ${SCHOOL_INFO.name} was marked absent from class today (${todayStr}). Please contact the school authority regarding the absence.\n- Authority, ${SCHOOL_INFO.name}`;
+      const waLink = `https://wa.me/${s.phone}?text=${encodeURIComponent(msg)}`;
+
+      const card = document.createElement('div');
+      card.className = `student-card ${isAbsent ? 'is-absent' : ''}`;
+      card.innerHTML = `
+        <div class="st-top">
+          <div class="name">${s.name}</div>
+          <span class="roll-tag">Roll: ${s.roll}</span>
+        </div>
+        <div class="st-sub">
+          <span><strong>${cName}</strong></span>
+          <span>📞 +${s.phone}</span>
+        </div>
+        <div class="toggle-container">
+          <button class="btn-toggle ${!isAbsent ? 'p-active' : ''}" onclick="toggleStatus(${globalIdx}, 'Present')">✓ Present</button>
+          <button class="btn-toggle ${isAbsent ? 'a-active' : ''}" onclick="toggleStatus(${globalIdx}, 'Absent')">✕ Absent</button>
+        </div>
+        <div class="st-footer">
+          <div>
+            ${isAbsent ? `<a href="${waLink}" target="_blank" class="btn-wa-link">📲 WhatsApp Alert</a>` : `<span style="font-size:11px; color:var(--success); font-weight:700;">● Attendance Marked</span>`}
+          </div>
+          <div style="display:flex; gap:6px;">
+            <button class="btn btn-ghost" style="padding:4px 8px; font-size:11px;" onclick="openEditModal('${s.classId}', '${s.roll}', '${s.name}', '${s.phone}')">✏️ Edit</button>
+            <button class="btn btn-ghost" style="padding:4px 8px; font-size:11px; color:var(--danger);" onclick="handleDeleteStudent('${s.classId}', '${s.roll}')">🗑️</button>
+          </div>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  }
+
+  function toggleStatus(idx, status) {
+    students[idx].status = status;
+    renderAttendanceCards();
+  }
+
+  async function handleAddStudent() {
+    const classId = document.getElementById('inputClass').value;
+    const roll = document.getElementById('inputRoll').value.trim();
+    const name = document.getElementById('inputName').value.trim();
+    let phone = document.getElementById('inputPhone').value.trim().replace(/[^0-9]/g, '');
+
+    if (!roll || !name || !phone) return alert("Please fill in all fields!");
+    if (phone.startsWith('01')) phone = '88' + phone;
+
+    const newStudent = { classId, roll, name, phone, status: "Present" };
+    students.push(newStudent);
+    renderAttendanceCards();
+
+    document.getElementById('inputRoll').value = '';
+    document.getElementById('inputName').value = '';
+    document.getElementById('inputPhone').value = '';
+
+    if (isCloudConfigured()) {
+      await fetch(GOOGLE_SHEET_WEB_APP_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "addStudent", student: newStudent })
+      });
+      setTimeout(loadStudentsFromCloud, 1200);
+    }
+  }
+
+  function openEditModal(cId, roll, name, phone) {
+    document.getElementById('editOldClassId').value = cId;
+    document.getElementById('editOldRoll').value = roll;
+    document.getElementById('editClassSelect').value = cId;
+    document.getElementById('editRollInput').value = roll;
+    document.getElementById('editNameInput').value = name;
+    document.getElementById('editPhoneInput').value = phone;
+    document.getElementById('editModalBackdrop').style.display = 'flex';
+  }
+
+  function closeEditModal() {
+    document.getElementById('editModalBackdrop').style.display = 'none';
+  }
+
+  async function handleSaveEdit() {
+    const oldClassId = document.getElementById('editOldClassId').value;
+    const oldRoll = document.getElementById('editOldRoll').value;
+    const classId = document.getElementById('editClassSelect').value;
+    const roll = document.getElementById('editRollInput').value.trim();
+    const name = document.getElementById('editNameInput').value.trim();
+    let phone = document.getElementById('editPhoneInput').value.trim().replace(/[^0-9]/g, '');
+
+    if (!roll || !name || !phone) return alert("Please provide all details!");
+    if (phone.startsWith('01')) phone = '88' + phone;
+
+    const target = students.find(s => s.classId === oldClassId && s.roll === oldRoll);
+    if (target) {
+      target.classId = classId;
+      target.roll = roll;
+      target.name = name;
+      target.phone = phone;
+    }
+    closeEditModal();
+    renderAttendanceCards();
+
+    if (isCloudConfigured()) {
+      await fetch(GOOGLE_SHEET_WEB_APP_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "editStudent", student: { oldClassId, oldRoll, classId, roll, name, phone } })
+      });
+      setTimeout(loadStudentsFromCloud, 1200);
+    }
+  }
+
+  async function handleDeleteStudent(classId, roll) {
+    if (!confirm("Are you sure you want to delete this student record?")) return;
+    students = students.filter(s => !(s.classId === classId && s.roll === roll));
+    renderAttendanceCards();
+
+    if (isCloudConfigured()) {
+      await fetch(GOOGLE_SHEET_WEB_APP_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "deleteStudent", student: { classId, roll } })
+      });
+      setTimeout(loadStudentsFromCloud, 1200);
+    }
+  }
+
+  async function saveTodayAttendanceAndNotify() {
+    const currentFilter = document.getElementById('classFilter').value;
+    const targetStudents = students.filter(s => currentFilter === 'all' || s.classId === currentFilter);
+
+    if (targetStudents.length === 0) {
+      alert("No students to submit attendance for!");
+      return;
+    }
+
+    if (isCloudConfigured()) {
+      const records = targetStudents.map(s => ({
+        className: getClassName(s.classId),
+        schoolName: SCHOOL_INFO.name,
+        roll: s.roll,
+        name: s.name,
+        phone: s.phone,
+        status: s.status
+      }));
+
+      try {
+        await fetch(GOOGLE_SHEET_WEB_APP_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "saveAttendance", records: records })
+        });
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    const absentStudents = targetStudents.filter(s => s.status === 'Absent');
+
+    if (absentStudents.length === 0) {
+      alert("Attendance saved! All students are present today (No absent alerts required).");
+      return;
+    }
+
+    showAbsentBatchModal(absentStudents);
+  }
+
+  function showAbsentBatchModal(absents) {
+    const listContainer = document.getElementById('absentListContainer');
+    listContainer.innerHTML = '';
+    const todayStr = new Date().toLocaleDateString('en-CA');
+
+    absents.forEach((s, i) => {
+      const cName = getClassName(s.classId);
+      const msg = `Dear Parent,\nStudent ${s.name} (${cName}, Roll: ${s.roll}) of ${SCHOOL_INFO.name} was marked absent from class today (${todayStr}). Please contact the school authority regarding the absence.\n- Authority, ${SCHOOL_INFO.name}`;
+      const waLink = `https://wa.me/${s.phone}?text=${encodeURIComponent(msg)}`;
+
+      const row = document.createElement('div');
+      row.className = 'absent-item-row';
+      row.innerHTML = `
+        <div class="absent-item-info">
+          <strong>${i + 1}. ${s.name} (Roll: ${s.roll})</strong>
+          <span>${cName} | +${s.phone}</span>
+        </div>
+        <a href="${waLink}" target="_blank" class="btn-wa-link" onclick="this.style.background='#64748b'; this.innerText='Sent ✓';">📲 Send</a>
+      `;
+      listContainer.appendChild(row);
+    });
+
+    document.getElementById('absentBatchModal').style.display = 'flex';
+  }
+
+  function closeAbsentModal() {
+    document.getElementById('absentBatchModal').style.display = 'none';
+  }
+
+  function copyAllAbsentSummary() {
+    const currentFilter = document.getElementById('classFilter').value;
+    const targetStudents = students.filter(s => currentFilter === 'all' || s.classId === currentFilter);
+    const absents = targetStudents.filter(s => s.status === 'Absent');
+    const todayStr = new Date().toLocaleDateString('en-CA');
+
+    let text = `📢 Absent Students Notice - ${SCHOOL_INFO.name}\nDate: ${todayStr}\n\n`;
+    absents.forEach((s, idx) => {
+      text += `${idx + 1}. ${s.name} (${getClassName(s.classId)}, Roll: ${s.roll}) - Phone: +${s.phone}\n`;
+    });
+    text += `\nDear Parents, please contact the school regarding today's absence.\n- Authority, ${SCHOOL_INFO.name}`;
+
+    navigator.clipboard.writeText(text).then(() => {
+      alert("All absent students' list copied to clipboard! You can paste it directly into your WhatsApp broadcast group.");
+    });
+  }
+
+  async function computeReports() {
+    const classId = document.getElementById('reportClassSelect').value;
+    const targetClassName = getClassName(classId);
+    const filterType = document.getElementById('reportTimeFilter').value;
+    const searchKey = document.getElementById('reportSearchKeyword').value.trim().toLowerCase();
+    const tbody = document.getElementById('reportTableBody');
+
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:15px;">Calculating reports...</td></tr>`;
+
+    if (!isCloudConfigured()) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--danger); padding:15px;">Google Sheet Web App URL not configured!</td></tr>`;
+      return;
+    }
+
+    try {
+      const res = await fetch(`${GOOGLE_SHEET_WEB_APP_URL}?type=history&className=${encodeURIComponent(targetClassName)}`);
+      const logs = await res.json();
+
+      let startDate, endDate;
+      const now = new Date();
+
+      if (filterType === 'today') {
+        const dStr = now.toISOString().split('T')[0];
+        startDate = new Date(dStr + "T00:00:00");
+        endDate = new Date(dStr + "T23:59:59");
+      } else if (filterType === 'week') {
+        const wAgo = new Date();
+        wAgo.setDate(now.getDate() - 7);
+        startDate = new Date(wAgo.toISOString().split('T')[0] + "T00:00:00");
+        endDate = new Date(now.toISOString().split('T')[0] + "T23:59:59");
+      } else if (filterType === 'month') {
+        const fDay = new Date(now.getFullYear(), now.getMonth(), 1);
+        startDate = new Date(fDay.toISOString().split('T')[0] + "T00:00:00");
+        endDate = new Date(now.toISOString().split('T')[0] + "T23:59:59");
+      } else if (filterType === 'custom') {
+        startDate = new Date(document.getElementById('reportStartDate').value + "T00:00:00");
+        endDate = new Date(document.getElementById('reportEndDate').value + "T23:59:59");
+      }
+
+      const uniqueDays = new Set();
+      const stats = {};
+
+      logs.forEach(item => {
+        const dStr = item.dateTime.substring(0, 10);
+        const logDate = new Date(dStr + "T12:00:00");
+
+        if (logDate >= startDate && logDate <= endDate) {
+          uniqueDays.add(dStr);
+          if (!stats[item.roll]) stats[item.roll] = { roll: item.roll, name: item.name, p: 0, a: 0 };
+          if (item.status.toLowerCase() === 'present') stats[item.roll].p++;
+          else stats[item.roll].a++;
+        }
+      });
+
+      const totalWorkingDays = uniqueDays.size;
+      if (totalWorkingDays === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--danger); padding:15px;">No attendance records found for this section!</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = '';
+      let list = Object.values(stats);
+      if (searchKey) list = list.filter(s => s.roll.includes(searchKey) || s.name.toLowerCase().includes(searchKey));
+      list.sort((a,b) => parseInt(a.roll) - parseInt(b.roll));
+
+      list.forEach(s => {
+        const pct = ((s.p / totalWorkingDays) * 100).toFixed(0);
+        const tr = document.createElement('tr');
+        tr.style.borderBottom = "1px solid var(--border)";
+        tr.innerHTML = `
+          <td style="padding:10px;"><strong>${s.roll}</strong></td>
+          <td style="padding:10px;">${s.name}</td>
+          <td style="padding:10px; text-align:center;">${totalWorkingDays}</td>
+          <td style="padding:10px; text-align:center; color:var(--success); font-weight:700;">${s.p}</td>
+          <td style="padding:10px; text-align:center; color:var(--danger); font-weight:700;">${s.a}</td>
+          <td style="padding:10px; text-align:center; font-weight:700;">${pct}%</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    } catch (e) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--danger); padding:15px;">Failed to fetch report from Google Sheet.</td></tr>`;
+    }
+  }
+
+  window.onload = init;
+</script>
+</body>
+</html>
