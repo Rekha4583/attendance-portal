@@ -125,7 +125,7 @@
       </div>
     </div>
 
-    <!-- সর্বমোট এবং নির্বাচিত ক্লাসের লাইভ কাউন্টার -->
+    <!-- Live Counters -->
     <div class="live-dashboard">
       <div class="live-clock-card">
         <div class="date" id="liveDateText">--</div>
@@ -286,7 +286,7 @@
 
 <script>
   // Paste your Apps Script Web App Deployment URL below:
-  const GOOGLE_SHEET_WEB_APP_URL = "https://script.google.com/macros/s/AKfycby-4F0mZL9Tkw4lRzaWEDcl5M6K7P-F6HIwDfLrdIL5rb9W7MGcdn2XXGo2drXtbnoN/exec";
+  const GOOGLE_SHEET_WEB_APP_URL = "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE";
 
   const SCHOOL_INFO = {
     name: "NEWCASTLE INTERNATIONAL SCHOOL",
@@ -319,150 +319,8 @@
     { id: "cls_10", name: "Class 10", group: "Class" }
   ];
 
-  // =========================================================================
-  // প্রতি ক্লাসে ৫ জন করে মোট ১০০ জন ডেমো শিক্ষার্থী
-  // =========================================================================
-  let students = [
-    // Std-1
-    { classId: "std_1", roll: "1", name: "Arian Ahmed", phone: "8801711000101", status: "Present" },
-    { classId: "std_1", roll: "2", name: "Zayan Kabir", phone: "8801711000102", status: "Present" },
-    { classId: "std_1", roll: "3", name: "Safa Islam", phone: "8801711000103", status: "Present" },
-    { classId: "std_1", roll: "4", name: "Rayyan Khan", phone: "8801711000104", status: "Present" },
-    { classId: "std_1", roll: "5", name: "Ayat Rahman", phone: "8801711000105", status: "Present" },
-
-    // Std-2
-    { classId: "std_2", roll: "1", name: "Tanvir Hasan", phone: "8801711000201", status: "Present" },
-    { classId: "std_2", roll: "2", name: "Muntaha Akter", phone: "8801711000202", status: "Present" },
-    { classId: "std_2", roll: "3", name: "Ahnaf Sadid", phone: "8801711000203", status: "Present" },
-    { classId: "std_2", roll: "4", name: "Nabila Tabassum", phone: "8801711000204", status: "Present" },
-    { classId: "std_2", roll: "5", name: "Samiul Islam", phone: "8801711000205", status: "Present" },
-
-    // Std-3
-    { classId: "std_3", roll: "1", name: "Farhan Labib", phone: "8801711000301", status: "Present" },
-    { classId: "std_3", roll: "2", name: "Anika Bushra", phone: "8801711000302", status: "Present" },
-    { classId: "std_3", roll: "3", name: "Maheem Chowdhury", phone: "8801711000303", status: "Present" },
-    { classId: "std_3", roll: "4", name: "Wafiq Alom", phone: "8801711000304", status: "Present" },
-    { classId: "std_3", roll: "5", name: "Ruhee Jannat", phone: "8801711000305", status: "Present" },
-
-    // Std-4
-    { classId: "std_4", roll: "1", name: "Nayeem Uddin", phone: "8801711000401", status: "Present" },
-    { classId: "std_4", roll: "2", name: "Tahmid Hossain", phone: "8801711000402", status: "Present" },
-    { classId: "std_4", roll: "3", name: "Sumaiya Binte", phone: "8801711000403", status: "Present" },
-    { classId: "std_4", roll: "4", name: "Tasnim Hasan", phone: "8801711000404", status: "Present" },
-    { classId: "std_4", roll: "5", name: "Fabiha Noor", phone: "8801711000405", status: "Present" },
-
-    // Std-5
-    { classId: "std_5", roll: "1", name: "Rifat Mahmud", phone: "8801711000501", status: "Present" },
-    { classId: "std_5", roll: "2", name: "Afia Humayra", phone: "8801711000502", status: "Present" },
-    { classId: "std_5", roll: "3", name: "Shahriar Shakil", phone: "8801711000503", status: "Present" },
-    { classId: "std_5", roll: "4", name: "Lamia Mehnaz", phone: "8801711000504", status: "Present" },
-    { classId: "std_5", roll: "5", name: "Adnan Sami", phone: "8801711000505", status: "Present" },
-
-    // Std-6
-    { classId: "std_6", roll: "1", name: "Zuhayr Haque", phone: "8801711000601", status: "Present" },
-    { classId: "std_6", roll: "2", name: "Marium Sultana", phone: "8801711000602", status: "Present" },
-    { classId: "std_6", roll: "3", name: "Mahir Faysal", phone: "8801711000603", status: "Present" },
-    { classId: "std_6", roll: "4", name: "Samia Tasneem", phone: "8801711000604", status: "Present" },
-    { classId: "std_6", roll: "5", name: "Tawsif Ur Rahman", phone: "8801711000605", status: "Present" },
-
-    // Std-7
-    { classId: "std_7", roll: "1", name: "Alve Hasan", phone: "8801711000701", status: "Present" },
-    { classId: "std_7", roll: "2", name: "Fariha Mehzabin", phone: "8801711000702", status: "Present" },
-    { classId: "std_7", roll: "3", name: "Mushfiqur Rahim", phone: "8801711000703", status: "Present" },
-    { classId: "std_7", roll: "4", name: "Israt Jahan", phone: "8801711000704", status: "Present" },
-    { classId: "std_7", roll: "5", name: "Shakib Al Hasan", phone: "8801711000705", status: "Present" },
-
-    // Std-8
-    { classId: "std_8", roll: "1", name: "Mehedi Hasan", phone: "8801711000801", status: "Present" },
-    { classId: "std_8", roll: "2", name: "Khadija Tul Kobra", phone: "8801711000802", status: "Present" },
-    { classId: "std_8", roll: "3", name: "Ashfaq Ahmed", phone: "8801711000803", status: "Present" },
-    { classId: "std_8", roll: "4", name: "Ayesha Siddiqua", phone: "8801711000804", status: "Present" },
-    { classId: "std_8", roll: "5", name: "Junaid Jamshed", phone: "8801711000805", status: "Present" },
-
-    // Std-9
-    { classId: "std_9", roll: "1", name: "Saadman Sakib", phone: "8801711000901", status: "Present" },
-    { classId: "std_9", roll: "2", name: "Tasnia Farin", phone: "8801711000902", status: "Present" },
-    { classId: "std_9", roll: "3", name: "Hasibul Hossain", phone: "8801711000903", status: "Present" },
-    { classId: "std_9", roll: "4", name: "Nusrat Imrose", phone: "8801711000904", status: "Present" },
-    { classId: "std_9", roll: "5", name: "Nazmul Huda", phone: "8801711000905", status: "Present" },
-
-    // Std-10
-    { classId: "std_10", roll: "1", name: "Tamim Iqbal", phone: "8801711001001", status: "Present" },
-    { classId: "std_10", roll: "2", name: "Sabrina Prome", phone: "8801711001002", status: "Present" },
-    { classId: "std_10", roll: "3", name: "Mahmudullah Riyad", phone: "8801711001003", status: "Present" },
-    { classId: "std_10", roll: "4", name: "Sadia Islam", phone: "8801711001004", status: "Present" },
-    { classId: "std_10", roll: "5", name: "Mustafizur Rahman", phone: "8801711001005", status: "Present" },
-
-    // Class 1
-    { classId: "cls_1", roll: "1", name: "Kazi Abrar", phone: "8801722000101", status: "Present" },
-    { classId: "cls_1", roll: "2", name: "Nusrat Jahan", phone: "8801722000102", status: "Present" },
-    { classId: "cls_1", roll: "3", name: "Sayeed Anowar", phone: "8801722000103", status: "Present" },
-    { classId: "cls_1", roll: "4", name: "Tahia Tasnim", phone: "8801722000104", status: "Present" },
-    { classId: "cls_1", roll: "5", name: "Zubair Masud", phone: "8801722000105", status: "Present" },
-
-    // Class 2
-    { classId: "cls_2", roll: "1", name: "Mirza Galib", phone: "8801722000201", status: "Present" },
-    { classId: "cls_2", roll: "2", name: "Humayra Kabir", phone: "8801722000202", status: "Present" },
-    { classId: "cls_2", roll: "3", name: "Siam Ahmed", phone: "8801722000203", status: "Present" },
-    { classId: "cls_2", roll: "4", name: "Samira Khanom", phone: "8801722000204", status: "Present" },
-    { classId: "cls_2", roll: "5", name: "Ehsanul Haque", phone: "8801722000205", status: "Present" },
-
-    // Class 3
-    { classId: "cls_3", roll: "1", name: "Wasim Akram", phone: "8801722000301", status: "Present" },
-    { classId: "cls_3", roll: "2", name: "Rumaiza Binte", phone: "8801722000302", status: "Present" },
-    { classId: "cls_3", roll: "3", name: "Jawad Rahim", phone: "8801722000303", status: "Present" },
-    { classId: "cls_3", roll: "4", name: "Anisa Tahsin", phone: "8801722000304", status: "Present" },
-    { classId: "cls_3", roll: "5", name: "Shariq Hasan", phone: "8801722000305", status: "Present" },
-
-    // Class 4
-    { classId: "cls_4", roll: "1", name: "Touhid Hridoy", phone: "8801722000401", status: "Present" },
-    { classId: "cls_4", roll: "2", name: "Mahfuza Khatun", phone: "8801722000402", status: "Present" },
-    { classId: "cls_4", roll: "3", name: "Shariful Islam", phone: "8801722000403", status: "Present" },
-    { classId: "cls_4", roll: "4", name: "Raihana Akter", phone: "8801722000404", status: "Present" },
-    { classId: "cls_4", roll: "5", name: "Tanzim Hasan", phone: "8801722000405", status: "Present" },
-
-    // Class 5
-    { classId: "cls_5", roll: "1", name: "Liton Kumar", phone: "8801722000501", status: "Present" },
-    { classId: "cls_5", roll: "2", name: "Jannatul Ferdous", phone: "8801722000502", status: "Present" },
-    { classId: "cls_5", roll: "3", name: "Soumya Sarkar", phone: "8801722000503", status: "Present" },
-    { classId: "cls_5", roll: "4", name: "Farzana Haque", phone: "8801722000504", status: "Present" },
-    { classId: "cls_5", roll: "5", name: "Afif Hossain", phone: "8801722000505", status: "Present" },
-
-    // Class 6
-    { classId: "cls_6", roll: "1", name: "Sheikh Rasel", phone: "8801722000601", status: "Present" },
-    { classId: "cls_6", roll: "2", name: "Nabila Zannat", phone: "8801722000602", status: "Present" },
-    { classId: "cls_6", roll: "3", name: "Zunaid Ahmed", phone: "8801722000603", status: "Present" },
-    { classId: "cls_6", roll: "4", name: "Suraiya Parvin", phone: "8801722000604", status: "Present" },
-    { classId: "cls_6", roll: "5", name: "Kamrul Islam", phone: "8801722000605", status: "Present" },
-
-    // Class 7
-    { classId: "cls_7", roll: "1", name: "Rishad Hossain", phone: "8801722000701", status: "Present" },
-    { classId: "cls_7", roll: "2", name: "Marufa Akter", phone: "8801722000702", status: "Present" },
-    { classId: "cls_7", roll: "3", name: "Tanzid Hasan", phone: "8801722000703", status: "Present" },
-    { classId: "cls_7", roll: "4", name: "Salma Khatun", phone: "8801722000704", status: "Present" },
-    { classId: "cls_7", roll: "5", name: "Nasum Ahmed", phone: "8801722000705", status: "Present" },
-
-    // Class 8
-    { classId: "cls_8", roll: "1", name: "Taijul Islam", phone: "8801722000801", status: "Present" },
-    { classId: "cls_8", roll: "2", name: "Rumana Ahmed", phone: "8801722000802", status: "Present" },
-    { classId: "cls_8", roll: "3", name: "Ebadot Hossain", phone: "8801722000803", status: "Present" },
-    { classId: "cls_8", roll: "4", name: "Sharmin Sultana", phone: "8801722000804", status: "Present" },
-    { classId: "cls_8", roll: "5", name: "Khaled Ahmed", phone: "8801722000805", status: "Present" },
-
-    // Class 9
-    { classId: "cls_9", roll: "1", name: "Hasan Mahmud", phone: "8801722000901", status: "Present" },
-    { classId: "cls_9", roll: "2", name: "Nahida Akter", phone: "8801722000902", status: "Present" },
-    { classId: "cls_9", roll: "3", name: "Zakir Hasan", phone: "8801722000903", status: "Present" },
-    { classId: "cls_9", roll: "4", name: "Sanjida Islam", phone: "8801722000904", status: "Present" },
-    { classId: "cls_9", roll: "5", name: "Mosaddek Hossain", phone: "8801722000905", status: "Present" },
-
-    // Class 10
-    { classId: "cls_10", roll: "1", name: "Taskin Ahmed", phone: "8801722001001", status: "Present" },
-    { classId: "cls_10", roll: "2", name: "Jahanara Alam", phone: "8801722001002", status: "Present" },
-    { classId: "cls_10", roll: "3", name: "Shoriful Islam", phone: "8801722001003", status: "Present" },
-    { classId: "cls_10", roll: "4", name: "Shamima Sultana", phone: "8801722001004", status: "Present" },
-    { classId: "cls_10", roll: "5", name: "Rubel Hossain", phone: "8801722001005", status: "Present" }
-  ];
+  // সব ডেমো ডেটা মুছে খালি অ্যারে রাখা হলো
+  let students = [];
 
   function init() {
     const today = new Date();
@@ -472,7 +330,6 @@
     startClock();
     populateDropdowns();
 
-    // ক্লাউড কানেক্ট থাকলে শিট থেকে ফেচ হবে, অন্যথায় ১০০ জন ডেমো স্টুডেন্ট স্বয়ংক্রিয়ভাবে লোড হবে
     if (isCloudConfigured()) {
       loadStudentsFromCloud();
     } else {
@@ -501,7 +358,7 @@
     const editSelect = document.getElementById('editClassSelect');
 
     const generateOptions = (includeAll) => {
-      let html = includeAll ? `<option value="all">All Classes & Standards (100 Students)</option>` : '';
+      let html = includeAll ? `<option value="all">All Classes & Standards</option>` : '';
       html += `<optgroup label="Standard (Std-1 to Std-10)">`;
       classList.filter(c => c.group === 'Standard').forEach(c => {
         html += `<option value="${c.id}">${c.name}</option>`;
@@ -544,12 +401,12 @@
     try {
       const res = await fetch(GOOGLE_SHEET_WEB_APP_URL + "?type=students");
       const cloudData = await res.json();
-      if (Array.isArray(cloudData) && cloudData.length > 0) {
+      if (Array.isArray(cloudData)) {
         students = cloudData;
       }
       renderAttendanceCards();
     } catch (e) {
-      console.warn("Using offline demo dataset:", e);
+      console.warn("Cloud load error:", e);
       renderAttendanceCards();
     }
   }
@@ -592,7 +449,7 @@
     updateCounters(visibleList);
 
     if (visibleList.length === 0) {
-      container.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; padding: 30px; color: var(--text-muted); background: #f8fafc; border-radius: 12px;">No students found in this section. Add students using the form above.</div>`;
+      container.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; padding: 30px; color: var(--text-muted); background: #f8fafc; border-radius: 12px;">No students found. Use the 'Add New Student' form above to add students.</div>`;
       return;
     }
 
@@ -733,7 +590,7 @@
     const targetStudents = students.filter(s => currentFilter === 'all' || s.classId === currentFilter);
 
     if (targetStudents.length === 0) {
-      alert("No students to submit attendance for!");
+      alert("No students found to submit attendance for!");
       return;
     }
 
@@ -762,7 +619,7 @@
     const absentStudents = targetStudents.filter(s => s.status === 'Absent');
 
     if (absentStudents.length === 0) {
-      alert("Attendance saved! All students are present today (No absent alerts required).");
+      alert("Attendance saved! All students in this section are present today.");
       return;
     }
 
