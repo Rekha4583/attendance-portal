@@ -121,7 +121,7 @@
         </div>
       </div>
       <div style="font-size: 13px; font-weight: 700; color: var(--primary-accent); background: #e0e7ff; padding: 6px 14px; border-radius: 20px;">
-        Central Attendance Portal
+        Live Attendance System
       </div>
     </div>
 
@@ -154,7 +154,7 @@
     </div>
   </div>
 
-  <!-- 1. Daily Attendance View -->
+  <!-- ১. দৈনিক হাজিরা ভিউ -->
   <div class="app-card" id="tabAttendanceView">
     <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
       <div style="flex: 1; max-width: 320px;">
@@ -180,7 +180,7 @@
     <div class="student-grid" id="studentCardsContainer"></div>
   </div>
 
-  <!-- 2. Reports View -->
+  <!-- ২. রিপোর্ট ও সামারি ভিউ -->
   <div class="app-card" id="tabReportsView" style="display: none;">
     <div class="form-row">
       <select id="reportClassSelect"></select>
@@ -225,13 +225,13 @@
 
 </div>
 
-<!-- Mobile Bottom Dock -->
+<!-- মোবাইল ফিক্সড ডক -->
 <div class="mobile-dock">
   <button class="btn btn-primary" onclick="loadStudentsFromCloud()">🔄 Refresh</button>
   <button class="btn btn-success" onclick="saveTodayAttendanceAndNotify()">📊 Submit & Alert Absents</button>
 </div>
 
-<!-- Absent WhatsApp Batch Dispatcher Modal -->
+<!-- অনুপস্থিত শিক্ষার্থী মেসেঞ্জার মডাল -->
 <div class="modal-backdrop" id="absentBatchModal">
   <div class="modal-box">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
@@ -251,7 +251,7 @@
   </div>
 </div>
 
-<!-- Edit Modal -->
+<!-- এডিট মডাল -->
 <div class="modal-backdrop" id="editModalBackdrop">
   <div class="modal-box">
     <h3 style="font-size: 16px; font-weight: 800; color: var(--primary); margin-bottom: 14px;">✏️ Edit Student Information</h3>
@@ -285,8 +285,10 @@
 </div>
 
 <script>
-  // Paste your Apps Script Web App Deployment URL below:
-  const GOOGLE_SHEET_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyKHWFEdObaF0n_IA667jpvxSrK6lCjiewb8AcaDsT_Ts9jGDhm2i8B0pMMrrTkZbz0/exec";
+  // =========================================================================
+  // নিচে আপনার গুগল স্ক্রিপ্ট ডিপ্লয়মেন্ট লিঙ্কটি বসান
+  // =========================================================================
+  const GOOGLE_SHEET_WEB_APP_URL = "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE";
 
   const SCHOOL_INFO = {
     name: "NEWCASTLE INTERNATIONAL SCHOOL",
@@ -319,7 +321,6 @@
     { id: "cls_10", name: "Class 10", group: "Class" }
   ];
 
-  // সব ডেমো ডেটা মুছে খালি অ্যারে রাখা হলো
   let students = [];
 
   function init() {
@@ -338,7 +339,7 @@
   }
 
   function isCloudConfigured() {
-    return GOOGLE_SHEET_WEB_APP_URL && !GOOGLE_SHEET_WEB_APP_URL.includes("YOUR_GOOGLE");
+    return GOOGLE_SHEET_WEB_APP_URL && !GOOGLE_SHEET_WEB_APP_URL.includes("https://script.google.com/macros/s/AKfycbyKHWFEdObaF0n_IA667jpvxSrK6lCjiewb8AcaDsT_Ts9jGDhm2i8B0pMMrrTkZbz0/exec");
   }
 
   function startClock() {
@@ -396,19 +397,28 @@
     document.getElementById('customDateRangeWrap').style.display = isCustom ? 'flex' : 'none';
   }
 
-  async function loadStudentsFromCloud() {
+  // JSONP মাধ্যমে ডাটা ফেচ
+  function loadStudentsFromCloud() {
     if (!isCloudConfigured()) return;
-    try {
-      const res = await fetch(GOOGLE_SHEET_WEB_APP_URL + "?type=students");
-      const cloudData = await res.json();
+    
+    const callbackName = "handleStudentsResponse_" + Math.floor(Math.random() * 1000000);
+    window[callbackName] = function(cloudData) {
       if (Array.isArray(cloudData)) {
         students = cloudData;
+        renderAttendanceCards();
       }
-      renderAttendanceCards();
-    } catch (e) {
-      console.warn("Cloud load error:", e);
-      renderAttendanceCards();
-    }
+      delete window[callbackName];
+      const scriptTag = document.getElementById(callbackName);
+      if (scriptTag) scriptTag.remove();
+    };
+
+    const script = document.createElement("script");
+    script.id = callbackName;
+    script.src = `${GOOGLE_SHEET_WEB_APP_URL}?type=students&callback=${callbackName}`;
+    script.onerror = function() {
+      console.warn("JSONP script injection failed.");
+    };
+    document.body.appendChild(script);
   }
 
   function updateCounters(visibleList) {
@@ -449,7 +459,7 @@
     updateCounters(visibleList);
 
     if (visibleList.length === 0) {
-      container.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; padding: 30px; color: var(--text-muted); background: #f8fafc; border-radius: 12px;">No students found. Use the 'Add New Student' form above to add students.</div>`;
+      container.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; padding: 30px; color: var(--text-muted); background: #f8fafc; border-radius: 12px;">No students found in this section. Add students using the form above.</div>`;
       return;
     }
 
@@ -495,6 +505,7 @@
     renderAttendanceCards();
   }
 
+  // URLSearchParams মাধ্যমে নির্ভরযোগ্য ডাটা সেভ
   async function handleAddStudent() {
     const classId = document.getElementById('inputClass').value;
     const roll = document.getElementById('inputRoll').value.trim();
@@ -513,13 +524,17 @@
     document.getElementById('inputPhone').value = '';
 
     if (isCloudConfigured()) {
+      const formData = new URLSearchParams();
+      formData.append("action", "addStudent");
+      formData.append("student", JSON.stringify(newStudent));
+
       await fetch(GOOGLE_SHEET_WEB_APP_URL, {
         method: "POST",
         mode: "no-cors",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "addStudent", student: newStudent })
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: formData.toString()
       });
-      setTimeout(loadStudentsFromCloud, 1200);
+      setTimeout(loadStudentsFromCloud, 1500);
     }
   }
 
@@ -559,13 +574,18 @@
     renderAttendanceCards();
 
     if (isCloudConfigured()) {
+      const editPayload = { oldClassId, oldRoll, classId, roll, name, phone };
+      const formData = new URLSearchParams();
+      formData.append("action", "editStudent");
+      formData.append("student", JSON.stringify(editPayload));
+
       await fetch(GOOGLE_SHEET_WEB_APP_URL, {
         method: "POST",
         mode: "no-cors",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "editStudent", student: { oldClassId, oldRoll, classId, roll, name, phone } })
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: formData.toString()
       });
-      setTimeout(loadStudentsFromCloud, 1200);
+      setTimeout(loadStudentsFromCloud, 1500);
     }
   }
 
@@ -575,17 +595,26 @@
     renderAttendanceCards();
 
     if (isCloudConfigured()) {
+      const formData = new URLSearchParams();
+      formData.append("action", "deleteStudent");
+      formData.append("student", JSON.stringify({ classId, roll }));
+
       await fetch(GOOGLE_SHEET_WEB_APP_URL, {
         method: "POST",
         mode: "no-cors",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "deleteStudent", student: { classId, roll } })
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: formData.toString()
       });
-      setTimeout(loadStudentsFromCloud, 1200);
+      setTimeout(loadStudentsFromCloud, 1500);
     }
   }
 
   async function saveTodayAttendanceAndNotify() {
+    if (!isCloudConfigured()) {
+      alert("Please configure your Google Apps Script Web App URL first!");
+      return;
+    }
+
     const currentFilter = document.getElementById('classFilter').value;
     const targetStudents = students.filter(s => currentFilter === 'all' || s.classId === currentFilter);
 
@@ -594,32 +623,34 @@
       return;
     }
 
-    if (isCloudConfigured()) {
-      const records = targetStudents.map(s => ({
-        className: getClassName(s.classId),
-        schoolName: SCHOOL_INFO.name,
-        roll: s.roll,
-        name: s.name,
-        phone: s.phone,
-        status: s.status
-      }));
+    const records = targetStudents.map(s => ({
+      className: getClassName(s.classId),
+      schoolName: SCHOOL_INFO.name,
+      roll: s.roll,
+      name: s.name,
+      phone: s.phone,
+      status: s.status
+    }));
 
-      try {
-        await fetch(GOOGLE_SHEET_WEB_APP_URL, {
-          method: "POST",
-          mode: "no-cors",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ action: "saveAttendance", records: records })
-        });
-      } catch (e) {
-        console.error(e);
-      }
+    const formData = new URLSearchParams();
+    formData.append("action", "saveAttendance");
+    formData.append("records", JSON.stringify(records));
+
+    try {
+      await fetch(GOOGLE_SHEET_WEB_APP_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: formData.toString()
+      });
+    } catch (e) {
+      console.error("Submission error:", e);
     }
 
     const absentStudents = targetStudents.filter(s => s.status === 'Absent');
 
     if (absentStudents.length === 0) {
-      alert("Attendance saved! All students in this section are present today.");
+      alert("Attendance saved successfully! All students in this section are present.");
       return;
     }
 
@@ -668,11 +699,12 @@
     text += `\nDear Parents, please contact the school regarding today's absence.\n- Authority, ${SCHOOL_INFO.name}`;
 
     navigator.clipboard.writeText(text).then(() => {
-      alert("All absent students' list copied to clipboard! You can paste it directly into your WhatsApp broadcast group.");
+      alert("All absent students' list copied to clipboard!");
     });
   }
 
-  async function computeReports() {
+  // নির্ভুল রিপোর্ট জেনারেটর (শিট নেম ম্যাপিং সহ)
+  function computeReports() {
     const classId = document.getElementById('reportClassSelect').value;
     const targetClassName = getClassName(classId);
     const filterType = document.getElementById('reportTimeFilter').value;
@@ -686,74 +718,115 @@
       return;
     }
 
-    try {
-      const res = await fetch(`${GOOGLE_SHEET_WEB_APP_URL}?type=history&className=${encodeURIComponent(targetClassName)}`);
-      const logs = await res.json();
+    const callbackName = "handleReportResponse_" + Math.floor(Math.random() * 1000000);
+    window[callbackName] = function(logs) {
+      renderReportTable(logs, filterType, searchKey, tbody, classId);
+      delete window[callbackName];
+      const scriptTag = document.getElementById(callbackName);
+      if (scriptTag) scriptTag.remove();
+    };
 
-      let startDate, endDate;
-      const now = new Date();
+    const script = document.createElement("script");
+    script.id = callbackName;
+    script.src = `${GOOGLE_SHEET_WEB_APP_URL}?type=history&className=${encodeURIComponent(targetClassName)}&callback=${callbackName}`;
+    script.onerror = function() {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--danger); padding:15px;">Failed to fetch report from Google Sheet.</td></tr>`;
+    };
+    document.body.appendChild(script);
+  }
 
-      if (filterType === 'today') {
-        const dStr = now.toISOString().split('T')[0];
-        startDate = new Date(dStr + "T00:00:00");
-        endDate = new Date(dStr + "T23:59:59");
-      } else if (filterType === 'week') {
-        const wAgo = new Date();
-        wAgo.setDate(now.getDate() - 7);
-        startDate = new Date(wAgo.toISOString().split('T')[0] + "T00:00:00");
-        endDate = new Date(now.toISOString().split('T')[0] + "T23:59:59");
-      } else if (filterType === 'month') {
-        const fDay = new Date(now.getFullYear(), now.getMonth(), 1);
-        startDate = new Date(fDay.toISOString().split('T')[0] + "T00:00:00");
-        endDate = new Date(now.toISOString().split('T')[0] + "T23:59:59");
-      } else if (filterType === 'custom') {
-        startDate = new Date(document.getElementById('reportStartDate').value + "T00:00:00");
-        endDate = new Date(document.getElementById('reportEndDate').value + "T23:59:59");
-      }
+  // কার্যদিবস ও উপস্থিতির শতকরা হিসাব
+  function renderReportTable(logs, filterType, searchKey, tbody, classId) {
+    if (!logs || logs.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--danger); padding:15px;">No attendance history found for this class in Google Sheets!</td></tr>`;
+      return;
+    }
 
-      const uniqueDays = new Set();
-      const stats = {};
+    let startStr = "", endStr = "";
+    const now = new Date();
+    const getZeroDate = (d) => d.toISOString().split('T')[0];
 
-      logs.forEach(item => {
-        const dStr = item.dateTime.substring(0, 10);
-        const logDate = new Date(dStr + "T12:00:00");
-
-        if (logDate >= startDate && logDate <= endDate) {
-          uniqueDays.add(dStr);
-          if (!stats[item.roll]) stats[item.roll] = { roll: item.roll, name: item.name, p: 0, a: 0 };
-          if (item.status.toLowerCase() === 'present') stats[item.roll].p++;
-          else stats[item.roll].a++;
-        }
-      });
-
-      const totalWorkingDays = uniqueDays.size;
-      if (totalWorkingDays === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--danger); padding:15px;">No attendance records found for this section!</td></tr>`;
+    if (filterType === 'today') {
+      startStr = getZeroDate(now);
+      endStr = getZeroDate(now);
+    } else if (filterType === 'week') {
+      const wAgo = new Date();
+      wAgo.setDate(now.getDate() - 7);
+      startStr = getZeroDate(wAgo);
+      endStr = getZeroDate(now);
+    } else if (filterType === 'month') {
+      const fDay = new Date(now.getFullYear(), now.getMonth(), 1);
+      startStr = getZeroDate(fDay);
+      endStr = getZeroDate(now);
+    } else if (filterType === 'custom') {
+      startStr = document.getElementById('reportStartDate').value;
+      endStr = document.getElementById('reportEndDate').value;
+      if (!startStr || !endStr) {
+        alert("Please select both Start Date and End Date!");
         return;
       }
-
-      tbody.innerHTML = '';
-      let list = Object.values(stats);
-      if (searchKey) list = list.filter(s => s.roll.includes(searchKey) || s.name.toLowerCase().includes(searchKey));
-      list.sort((a,b) => parseInt(a.roll) - parseInt(b.roll));
-
-      list.forEach(s => {
-        const pct = ((s.p / totalWorkingDays) * 100).toFixed(0);
-        const tr = document.createElement('tr');
-        tr.style.borderBottom = "1px solid var(--border)";
-        tr.innerHTML = `
-          <td style="padding:10px;"><strong>${s.roll}</strong></td>
-          <td style="padding:10px;">${s.name}</td>
-          <td style="padding:10px; text-align:center;">${totalWorkingDays}</td>
-          <td style="padding:10px; text-align:center; color:var(--success); font-weight:700;">${s.p}</td>
-          <td style="padding:10px; text-align:center; color:var(--danger); font-weight:700;">${s.a}</td>
-          <td style="padding:10px; text-align:center; font-weight:700;">${pct}%</td>
-        `;
-        tbody.appendChild(tr);
-      });
-    } catch (e) {
-      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--danger); padding:15px;">Failed to fetch report from Google Sheet.</td></tr>`;
     }
+
+    const uniqueDays = new Set();
+    const stats = {};
+
+    logs.forEach(item => {
+      if (!item.dateTime) return;
+      const logDateStr = item.dateTime.substring(0, 10);
+
+      if (logDateStr >= startStr && logDateStr <= endStr) {
+        uniqueDays.add(logDateStr);
+
+        const rollKey = item.roll;
+        if (!stats[rollKey]) {
+          stats[rollKey] = { 
+            roll: item.roll, 
+            name: item.name || "Student " + item.roll, 
+            p: 0, 
+            a: 0 
+          };
+        }
+
+        const st = item.status.toString().toLowerCase();
+        if (st === 'present') {
+          stats[rollKey].p++;
+        } else {
+          stats[rollKey].a++;
+        }
+      }
+    });
+
+    const totalWorkingDays = uniqueDays.size;
+    if (totalWorkingDays === 0) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--danger); padding:15px;">No classes were recorded between ${startStr} and ${endStr}!</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = '';
+    let list = Object.values(stats);
+
+    if (searchKey) {
+      list = list.filter(s => s.roll.includes(searchKey) || s.name.toLowerCase().includes(searchKey));
+    }
+
+    list.sort((a, b) => parseInt(a.roll) - parseInt(b.roll));
+
+    list.forEach(s => {
+      const pct = totalWorkingDays > 0 ? ((s.p / totalWorkingDays) * 100).toFixed(0) : 0;
+      const tr = document.createElement('tr');
+      tr.style.borderBottom = "1px solid var(--border)";
+      tr.innerHTML = `
+        <td style="padding:10px;"><strong>${s.roll}</strong></td>
+        <td style="padding:10px;">${s.name}</td>
+        <td style="padding:10px; text-align:center; font-weight:bold;">${totalWorkingDays}</td>
+        <td style="padding:10px; text-align:center; color:var(--success); font-weight:700;">${s.p}</td>
+        <td style="padding:10px; text-align:center; color:var(--danger); font-weight:700;">${s.a}</td>
+        <td style="padding:10px; text-align:center; font-weight:700;">
+          <span style="color:${pct >= 75 ? 'var(--success)' : 'var(--danger)'};">${pct}%</span>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
   }
 
   window.onload = init;
